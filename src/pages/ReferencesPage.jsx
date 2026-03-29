@@ -13,7 +13,7 @@ function ReferencesPage() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState("");
 
-  const apiUrl = "http://localhost:3000/api/references";
+  const apiUrl = "https://comp229-assignment2-f86t.onrender.com/api/references";
 
   async function loadReferences() {
     const response = await fetch(apiUrl);

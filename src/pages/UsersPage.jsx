@@ -12,7 +12,7 @@ function UsersPage() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState("");
 
-  const apiUrl = "http://localhost:3000/api/users";
+  const apiUrl = "https://comp229-assignment2-f86t.onrender.com/api/users";
 
   async function loadUsers() {
     const response = await fetch(apiUrl);

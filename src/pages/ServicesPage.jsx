@@ -10,7 +10,7 @@ function ServicesPage() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState("");
 
-  const apiUrl = "http://localhost:3000/api/services";
+  const apiUrl = "https://comp229-assignment2-f86t.onrender.com/api/services";
 
   async function loadServices() {
     const response = await fetch(apiUrl);

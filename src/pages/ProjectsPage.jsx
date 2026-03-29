@@ -11,7 +11,7 @@ function ProjectsPage() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState("");
 
-  const apiUrl = "http://localhost:3000/api/projects";
+  const apiUrl = "https://comp229-assignment2-f86t.onrender.com/api/projects";
 
   async function loadProjects() {
     const response = await fetch(apiUrl);

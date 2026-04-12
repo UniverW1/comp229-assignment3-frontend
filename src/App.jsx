@@ -1,4 +1,4 @@
-import { Link, Routes, Route } from "react-router-dom";
+import { Link, Routes, Route, useNavigate } from "react-router-dom";
 import UsersPage from "./pages/UsersPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ServicesPage from "./pages/ServicesPage";
@@ -7,12 +7,13 @@ import SignUpPage from "./pages/SignUpPage";
 import SignInPage from "./pages/SignInPage";
 import DashboardPage from "./pages/DashboardPage";
 
-function App() {
+function AppContent() {
   const token = localStorage.getItem("token");
+  const navigate = useNavigate();
 
   function handleSignOut() {
     localStorage.removeItem("token");
-    window.location.href = "/";
+    navigate("/");
   }
 
   return (
@@ -54,4 +55,4 @@ function App() {
   );
 }
 
-export default App;
+export default AppContent;

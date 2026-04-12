@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 
 function SignInPage() {
@@ -9,6 +10,7 @@ function SignInPage() {
 
   const [form, setForm] = useState(emptyForm);
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -31,7 +33,7 @@ function SignInPage() {
 
     if (response.ok && result.token) {
       localStorage.setItem("token", result.token);
-      window.location.href = "/dashboard";
+      navigate("/dashboard");
     }
   }
 

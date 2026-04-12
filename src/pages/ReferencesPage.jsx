@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "../config";
 
 function ReferencesPage() {
   const emptyForm = {
@@ -6,14 +7,15 @@ function ReferencesPage() {
     lastname: "",
     email: "",
     position: "",
-    company: ""
+    company: "",
   };
 
   const [referencesList, setReferencesList] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState("");
 
-  const apiUrl = "https://comp229-assignment2-f86t.onrender.com/api/references";
+  const apiUrl = `${API_BASE_URL}/references`;
+  const token = localStorage.getItem("token");
 
   async function loadReferences() {
     const response = await fetch(apiUrl);
@@ -26,10 +28,7 @@ function ReferencesPage() {
   }, []);
 
   function handleChange(e) {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   }
 
   async function handleSubmit(e) {
@@ -39,17 +38,19 @@ function ReferencesPage() {
       await fetch(`${apiUrl}/${editingId}`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify(form),
       });
     } else {
       await fetch(apiUrl, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify(form),
       });
     }
 
@@ -64,14 +65,17 @@ function ReferencesPage() {
       lastname: reference.lastname || "",
       email: reference.email || "",
       position: reference.position || "",
-      company: reference.company || ""
+      company: reference.company || "",
     });
     setEditingId(reference.id);
   }
 
   async function handleDelete(id) {
     await fetch(`${apiUrl}/${id}`, {
-      method: "DELETE"
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     loadReferences();
   }
@@ -85,67 +89,65 @@ function ReferencesPage() {
     <div>
       <h2>References</h2>
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <input
-            type="text"
-            name="firstname"
-            placeholder="First Name"
-            value={form.firstname}
-            onChange={handleChange}
-          />
-        </div>
+      {token && (
+        <form onSubmit={handleSubmit}>
+          <div>
+            <input
+              name="firstname"
+              placeholder="First Name"
+              value={form.firstname}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <div>
-          <input
-            type="text"
-            name="lastname"
-            placeholder="Last Name"
-            value={form.lastname}
-            onChange={handleChange}
-          />
-        </div>
+          <div>
+            <input
+              name="lastname"
+              placeholder="Last Name"
+              value={form.lastname}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <div>
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-          />
-        </div>
+          <div>
+            <input
+              name="email"
+              type="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <div>
-          <input
-            type="text"
-            name="position"
-            placeholder="Position"
-            value={form.position}
-            onChange={handleChange}
-          />
-        </div>
+          <div>
+            <input
+              name="position"
+              placeholder="Position"
+              value={form.position}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <div>
-          <input
-            type="text"
-            name="company"
-            placeholder="Company"
-            value={form.company}
-            onChange={handleChange}
-          />
-        </div>
+          <div>
+            <input
+              name="company"
+              placeholder="Company"
+              value={form.company}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <button type="submit">
-          {editingId ? "Update Reference" : "Add Reference"}
-        </button>
-
-        {editingId && (
-          <button type="button" onClick={handleCancel}>
-            Cancel
+          <button type="submit">
+            {editingId ? "Update Reference" : "Add Reference"}
           </button>
-        )}
-      </form>
+          {editingId && <button onClick={handleCancel}>Cancel</button>}
+        </form>
+      )}
 
       <hr />
 
@@ -154,7 +156,7 @@ function ReferencesPage() {
       {referencesList.length === 0 ? (
         <p>No references found.</p>
       ) : (
-        <table border="1" cellPadding="8">
+        <table>
           <thead>
             <tr>
               <th>First Name</th>
@@ -165,7 +167,6 @@ function ReferencesPage() {
               <th>Actions</th>
             </tr>
           </thead>
-
           <tbody>
             {referencesList.map((reference) => (
               <tr key={reference.id}>
@@ -175,8 +176,14 @@ function ReferencesPage() {
                 <td>{reference.position}</td>
                 <td>{reference.company}</td>
                 <td>
-                  <button onClick={() => handleEdit(reference)}>Edit</button>
-                  <button onClick={() => handleDelete(reference.id)}>Delete</button>
+                  {token && (
+                    <>
+                      <button onClick={() => handleEdit(reference)}>Edit</button>
+                      <button onClick={() => handleDelete(reference.id)}>
+                        Delete
+                      </button>
+                    </>
+                  )}
                 </td>
               </tr>
             ))}

@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "../config";
 
 function UsersPage() {
   const emptyForm = {
     firstname: "",
     lastname: "",
     email: "",
-    password: ""
+    password: "",
   };
 
   const [users, setUsers] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState("");
 
-  const apiUrl = "https://comp229-assignment2-f86t.onrender.com/api/users";
+  const apiUrl = `${API_BASE_URL}/users`;
+  const token = localStorage.getItem("token");
 
   async function loadUsers() {
     const response = await fetch(apiUrl);
@@ -25,10 +27,7 @@ function UsersPage() {
   }, []);
 
   function handleChange(e) {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   }
 
   async function handleSubmit(e) {
@@ -38,17 +37,18 @@ function UsersPage() {
       await fetch(`${apiUrl}/${editingId}`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify(form),
       });
     } else {
       await fetch(apiUrl, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify(form),
       });
     }
 
@@ -62,14 +62,17 @@ function UsersPage() {
       firstname: user.firstname || "",
       lastname: user.lastname || "",
       email: user.email || "",
-      password: user.password || ""
+      password: "",
     });
     setEditingId(user.id);
   }
 
   async function handleDelete(id) {
     await fetch(`${apiUrl}/${id}`, {
-      method: "DELETE"
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     loadUsers();
   }
@@ -86,53 +89,48 @@ function UsersPage() {
       <form onSubmit={handleSubmit}>
         <div>
           <input
-            type="text"
             name="firstname"
             placeholder="First Name"
             value={form.firstname}
             onChange={handleChange}
+            required
           />
         </div>
 
         <div>
           <input
-            type="text"
             name="lastname"
             placeholder="Last Name"
             value={form.lastname}
             onChange={handleChange}
+            required
           />
         </div>
 
         <div>
           <input
-            type="email"
             name="email"
+            type="email"
             placeholder="Email"
             value={form.email}
             onChange={handleChange}
+            required
           />
         </div>
 
         <div>
           <input
-            type="text"
             name="password"
+            type="password"
             placeholder="Password"
             value={form.password}
             onChange={handleChange}
+            required={!editingId}
           />
         </div>
 
-        <button type="submit">
-          {editingId ? "Update User" : "Add User"}
-        </button>
-
-        {editingId && (
-          <button type="button" onClick={handleCancel}>
-            Cancel
-          </button>
-        )}
+        <button type="submit">{editingId ? "Update User" : "Add User"}</button>
+        {editingId && <button onClick={handleCancel}>Cancel</button>}
       </form>
 
       <hr />
@@ -142,7 +140,7 @@ function UsersPage() {
       {users.length === 0 ? (
         <p>No users found.</p>
       ) : (
-        <table border="1" cellPadding="8">
+        <table>
           <thead>
             <tr>
               <th>First Name</th>
@@ -152,7 +150,6 @@ function UsersPage() {
               <th>Actions</th>
             </tr>
           </thead>
-
           <tbody>
             {users.map((user) => (
               <tr key={user.id}>
@@ -161,8 +158,14 @@ function UsersPage() {
                 <td>{user.email}</td>
                 <td>{user.password}</td>
                 <td>
-                  <button onClick={() => handleEdit(user)}>Edit</button>
-                  <button onClick={() => handleDelete(user.id)}>Delete</button>
+                  {token && (
+                    <>
+                      <button onClick={() => handleEdit(user)}>Edit</button>
+                      <button onClick={() => handleDelete(user.id)}>
+                        Delete
+                      </button>
+                    </>
+                  )}
                 </td>
               </tr>
             ))}
